@@ -172,3 +172,19 @@ export default memo(App)
 ```
 
 Now if I change one of the todos, Just that todo will be re-rendered, and the others not. So, this is a great solution.
+
+**Very important tip**
+
+always for example to define initialState in `context` do this:
+
+correct
+```js
+const initialTodos = [];
+```
+
+wrong
+```js
+const initialState = {
+  todos: []
+}
+```
