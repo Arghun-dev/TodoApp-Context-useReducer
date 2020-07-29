@@ -74,3 +74,101 @@ function App() {
    )
 }
 ```
+
+## Performance Optimization
+
+**1.**
+
+Now as you can see I have export both `todos` and `dispatch` from one `context`, but this has a performance problem, to solve this issue you have to `split` this context into 2 contexts.
+
+How??
+
+```js
+import React, { createContext, useReducer } from 'react';
+import { todosReducer } from './reducers/todos.reducer.js';
+
+export const TodosContext = createContext();
+export const DispatchContext = createContext();
+
+const initialState = {
+  todos: []
+}
+
+const TodosProvider = (props) => {
+  const [todos, dispatch] = useReducer(todosReducer, initialState);
+  
+  return (
+    <TodosContext.Provider value={{ todos }}>
+      <DispatchContext.Provider value={{ dispatch }}>
+         {props.children}
+      </DispatchContext.Provider>
+    </TodosContext.Provider>
+  )
+}
+```
+
+Then when you want to disatch an action inside a component, you just need to import the dispatch from `DispatchContext` not `TodosContext` just it.
+
+
+**2.**
+
+second optimization you have to handle is that, **if you return just one single value from the context just do it inside {} not inside {{}}, because every time you make a change inside this components actually you create an object and this a re-render which is not good**
+
+```js
+import React, { createContext, useReducer } from 'react';
+import { todosReducer } from './reducers/todos.reducer.js';
+
+export const TodosContext = createContext();
+export const DispatchContext = createContext();
+
+const initialState = {
+  todos: []
+}
+
+const TodosProvider = (props) => {
+  const [todos, dispatch] = useReducer(todosReducer, initialState);
+  
+  return (
+    <TodosContext.Provider value={todos}>  // AS YOU CAN SEE I HAVE EXPORTED IT FROM {} not from {{}} 
+      <DispatchContext.Provider value={dispatch}>  // AS YOU CAN SEE I HAVE EXPORTED IT FROM {} not from {{}} 
+         {props.children}
+      </DispatchContext.Provider>
+    </TodosContext.Provider>
+  )
+}
+```
+
+and when you extract it from context inside you component extract it just like below:
+
+correct:
+```js
+const todos = useContext(TodosContext)
+```
+
+wrong:
+```js
+const { todos } = useContext(TodosContext)
+```
+
+
+**3. (memo)** 
+for example imagine I have a list of todos inside my component. And I edit just one todo from my list. and I just console.logged the re-render and I noticed that whenever I change just one todo, other todos re-render as well. And this is a problem for performance.
+
+To performance optimization I use `memo`. **This is the idea of `memoization`**
+
+**This is an optimization technique used primarily to speed up omputer programs by storing the results of expensive function calls and returning the cached result when the same inputs occur again**
+
+in class based components we use `PureComponent` but in functional components we use `memo`
+
+
+```js
+import React, { memo } from 'react';
+
+.
+.
+.
+
+export default memo(App)
+```
+
+Now if I change one of the todos, Just that todo will be re-rendered, and the others not. So, this is a great solution.
