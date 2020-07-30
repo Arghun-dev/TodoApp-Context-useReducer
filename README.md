@@ -193,10 +193,10 @@ const initialState = {
 ## Custom Hook Reducer + LocalStorage
 
 ```js
-import { useState, useEffect } from "react";
+import { useReducer, useEffect } from "react";
 
-function useLocalStorageState(key, defaultVal) {
-  const [state, setState] = useState(() => {
+function useLocalStorageReducer(key, defaultVal, reducer) {
+  const [state, dispatch] = useReducer(() => {
     let value;
     try {
       value = JSON.parse(
